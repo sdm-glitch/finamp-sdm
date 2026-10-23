@@ -20,6 +20,7 @@ import 'package:finamp/menus/track_menu.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/screens/blurred_player_screen_background.dart';
 import 'package:finamp/screens/lyrics_screen.dart';
+import 'package:finamp/sdm/player_card.dart';
 import 'package:finamp/services/current_track_metadata_provider.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/music_player_background_task.dart';
@@ -259,7 +260,7 @@ class _PlayerScreenContent extends ConsumerWidget {
                 title: PlayerScreenAppBarTitle(maxLines: maxToolbarLines),
                 leadingWidth: (isDesktop ? 40.0 : 48.0) * appbarActions.length,
                 leading: Row(children: appbarActions),
-                actions: [],
+                actions: [const SdmShareButton()],
                 titleSpacing: 0.0,
               ),
               // Required for sleep timer input
@@ -288,7 +289,7 @@ class _PlayerScreenContent extends ConsumerWidget {
                                     bottom: constraints.maxHeight * 0.03,
                                     right: max(0, constraints.maxHeight * 0.03 - 20),
                                   ),
-                                  child: Hero(tag: "player", child: const PlayerScreenAlbumImage()),
+                                  child: Hero(tag: "player", child: const SdmPlayerCard()),
                                 ),
                               ),
                               const Spacer(),
@@ -324,7 +325,7 @@ class _PlayerScreenContent extends ConsumerWidget {
                               SizedBox(
                                 height: controller.albumSize.height,
                                 width: controller.albumSize.width,
-                                child: const PlayerScreenAlbumImage(),
+                                child: const SdmPlayerCard(),
                               ),
                               SizedBox(
                                 height: controller.controlsSize.height,
