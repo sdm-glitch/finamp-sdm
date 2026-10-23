@@ -61,7 +61,9 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            resValue "string", "app_name", "Finamp"
+            // SDM build: own package id so it installs next to store Finamp, own name
+            applicationIdSuffix '.sdm'
+            resValue "string", "app_name", "Finamp SDM"
             // shrinkResources false
             // minifyEnabled false
         }
