@@ -18,7 +18,10 @@ import '../../services/favorite_provider.dart';
 import '../album_image.dart';
 
 class PlayerScreenAlbumImage extends ConsumerWidget {
-  const PlayerScreenAlbumImage({super.key});
+  const PlayerScreenAlbumImage({super.key, this.onTap});
+
+  /// SDM (0002): replaces the default tap action (play/pause), e.g. to turn the player card over
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,6 +59,10 @@ class PlayerScreenAlbumImage extends ConsumerWidget {
             child: SimpleGestureDetector(
               //TODO replace with PageView, this is just a placeholder
               onTap: () {
+                if (onTap != null) {
+                  onTap!();
+                  return;
+                }
                 unawaited(audioService.togglePlayback());
                 FeedbackHelper.feedback(FeedbackType.selection);
               },

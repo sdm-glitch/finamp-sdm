@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../components/LayoutSettingsScreen/player_screen_minimum_cover_padding_editor.dart';
 import '../extensions/localizations.dart';
 import '../models/finamp_models.dart';
+import '../sdm/player_card.dart';
 import '../services/finamp_settings_helper.dart';
 
 class PlayerSettingsScreen extends ConsumerWidget {
@@ -30,6 +31,7 @@ class PlayerSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 200.0),
         children: [
+          const SdmCardSettingsTiles(),
           ShowFeatureChipsToggle(),
           if (ref.watch(finampSettingsProvider.featureChipsConfiguration).enabled)
             ReorderableListView(

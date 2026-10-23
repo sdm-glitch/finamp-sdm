@@ -10,6 +10,7 @@ import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/main.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/models/jellyfin_models.dart';
+import 'package:finamp/sdm/player_card.dart';
 import 'package:finamp/services/current_track_metadata_provider.dart';
 import 'package:finamp/services/feedback_helper.dart';
 import 'package:finamp/services/music_player_background_task.dart';
@@ -151,7 +152,10 @@ class _LyricsScreenContentState extends ConsumerState<_LyricsScreenContent> {
 }
 
 class LyricsView extends ConsumerStatefulWidget {
-  const LyricsView({super.key});
+  const LyricsView({super.key, this.inCard = false});
+
+  /// SDM (0002): shown on the back of the player card - no album prelude
+  final bool inCard;
 
   @override
   ConsumerState createState() => _LyricsViewState();
@@ -266,13 +270,14 @@ class _LyricsViewState extends ConsumerState<LyricsView> with WidgetsBindingObse
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: constraints.maxHeight - 180),
-                child: ref.watch(finampSettingsProvider.showLyricsScreenAlbumPrelude)
-                    ? const PlayerScreenAlbumImage()
-                    : SizedBox(),
-              ),
-              const SizedBox(height: 24),
+              if (!widget.inCard)
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: constraints.maxHeight - 180),
+                  child: ref.watch(finampSettingsProvider.showLyricsScreenAlbumPrelude)
+                      ? const PlayerScreenAlbumImage()
+                      : SizedBox(),
+                ),
+              if (!widget.inCard) const SizedBox(height: 24),
               Icon(icon, size: 32, color: Theme.of(context).textTheme.headlineMedium!.color),
               const SizedBox(height: 12),
               Text(message, style: TextStyle(color: Theme.of(context).textTheme.headlineMedium!.color, fontSize: 16)),
@@ -347,7 +352,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> with WidgetsBindingObse
                               key: const ValueKey(-1),
                               controller: autoScrollController,
                               index: -1,
-                              child: ref.watch(finampSettingsProvider.showLyricsScreenAlbumPrelude)
+                              child: !widget.inCard && ref.watch(finampSettingsProvider.showLyricsScreenAlbumPrelude)
                                   ? SizedBox(
                                       height: constraints.maxHeight * 0.65,
                                       child: Center(
@@ -457,7 +462,9 @@ class _LyricLine extends ConsumerWidget {
       fontWeight: FontWeight.normal,
       // Keep text width consistent across the different weights
       letterSpacing: -0.4,
-      fontSize: lyricsFontSizeToSize(ref.watch(finampSettingsProvider.lyricsFontSize)).toDouble(),
+      fontSize:
+          SdmLyricsFontScope.maybeOf(context) ??
+          lyricsFontSizeToSize(ref.watch(finampSettingsProvider.lyricsFontSize)).toDouble(),
     );
     final currentLineStyle = unSyncedStyle;
     final lowlightStyle = unSyncedStyle.copyWith(color: Colors.grey);

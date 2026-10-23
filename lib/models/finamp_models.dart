@@ -184,7 +184,7 @@ class DefaultSettings {
   static const enableVibration = true;
   static const prioritizeCoverFactor = 8.0;
   static const suppressPlayerPadding = false;
-  static const hidePlayerBottomActions = false;
+  static const hidePlayerBottomActions = true; // SDM (0002)
   static const reportQueueToServer = false;
   static const periodicPlaybackSessionUpdateFrequencySeconds = 150;
   static const playOnStaleDelay = 90;
@@ -207,7 +207,7 @@ class DefaultSettings {
   static const hasDownloadedPlaylistInfo = false;
   static const transcodingStreamingFormat = FinampTranscodingStreamingFormat.aacFragmentedMp4;
   static const featureChipsConfiguration = FinampFeatureChipsConfiguration(
-    enabled: true,
+    enabled: false, // SDM (0002)
     features: [
       FinampFeatureChipType.explicit,
       FinampFeatureChipType.additionalPeople,
