@@ -20,6 +20,7 @@ import 'package:finamp/models/jellyfin_models.dart';
 import 'package:finamp/models/music_models.dart';
 import 'package:finamp/screens/home_screen_settings_screen.dart';
 import 'package:finamp/screens/music_screen.dart';
+import 'package:finamp/sdm/home_playlists.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/music_screen_provider.dart';
 import 'package:finamp/services/queue_service.dart';
@@ -64,6 +65,11 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    // SDM (0003): the home tab shows only the user's playlists
+    if (sdmPlaylistsOnlyHome) {
+      widget.refresh?.callback = () => ref.invalidate(sdmPlaylistsProvider);
+      return const SdmHomeContent();
+    }
     widget.refresh?.callback = _refresh;
     return RefreshIndicator(
       onRefresh: () async => _refresh(),
