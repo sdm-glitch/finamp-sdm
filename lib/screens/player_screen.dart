@@ -21,6 +21,7 @@ import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/screens/blurred_player_screen_background.dart';
 import 'package:finamp/screens/lyrics_screen.dart';
 import 'package:finamp/sdm/player_card.dart';
+import 'package:finamp/sdm/player_ui.dart';
 import 'package:finamp/services/current_track_metadata_provider.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/music_player_background_task.dart';
@@ -260,7 +261,7 @@ class _PlayerScreenContent extends ConsumerWidget {
                 title: PlayerScreenAppBarTitle(maxLines: maxToolbarLines),
                 leadingWidth: (isDesktop ? 40.0 : 48.0) * appbarActions.length,
                 leading: Row(children: appbarActions),
-                actions: [const SdmShareButton()],
+                actions: [const SdmPlayerMoreButton()],
                 titleSpacing: 0.0,
               ),
               // Required for sleep timer input
@@ -299,17 +300,12 @@ class _PlayerScreenContent extends ConsumerWidget {
                                 child: Column(
                                   children: [
                                     const Spacer(flex: 4),
-                                    TrackNameContent(controller),
+                                    const SdmTrackTitleRow(),
                                     const Spacer(flex: 4),
                                     ControlArea(controller),
                                     if (controller.shouldShow(PlayerHideable.bottomActions)) const Spacer(flex: 10),
                                     if (controller.shouldShow(PlayerHideable.bottomActions))
-                                      _buildBottomActions(
-                                        context,
-                                        controller,
-                                        isLyricsLoading: isLyricsLoading,
-                                        isLyricsAvailable: isLyricsAvailable,
-                                      ),
+                                      const SdmPlayerBottomRow(),
                                     const Spacer(flex: 4),
                                   ],
                                 ),
@@ -334,15 +330,10 @@ class _PlayerScreenContent extends ConsumerWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    TrackNameContent(controller),
+                                    const SdmTrackTitleRow(),
                                     ControlArea(controller),
                                     if (controller.shouldShow(PlayerHideable.bottomActions))
-                                      _buildBottomActions(
-                                        context,
-                                        controller,
-                                        isLyricsLoading: isLyricsLoading,
-                                        isLyricsAvailable: isLyricsAvailable,
-                                      ),
+                                      const SdmPlayerBottomRow(),
                                     if (!controller.shouldShow(PlayerHideable.bottomActions)) const SizedBox(height: 5),
                                   ],
                                 ),
@@ -620,9 +611,7 @@ class PlayerHideableController {
     _album = null;
     _useLandscape = null;
     _visible = List.from(PlayerHideable.values);
-    if (ref.watch(finampSettingsProvider.hidePlayerBottomActions)) {
-      _visible.remove(PlayerHideable.bottomActions);
-    }
+    // SDM (0005): the bottom row (share + queue) is always part of the layout
     if (ref.watch(finampSettingsProvider.suppressPlayerPadding)) {
       _visible.remove(PlayerHideable.controlsPaddingSmall);
       _visible.remove(PlayerHideable.controlsPaddingBig);

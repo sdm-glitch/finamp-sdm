@@ -31,6 +31,8 @@ import '../services/finamp_settings_helper.dart';
 import '../services/media_state_stream.dart';
 import '../services/music_player_background_task.dart';
 import '../services/process_artist.dart';
+import 'package:finamp/components/favorite_button.dart';
+import 'package:finamp/sdm/player_ui.dart';
 import 'PlayerScreen/player_split_screen_scaffold.dart';
 import 'album_image.dart';
 
@@ -39,7 +41,7 @@ class NowPlayingBar extends ConsumerWidget {
 
   static const horizontalPadding = 8.0;
   static const albumImageSize = 64.0;
-  static const showPlayButtonAtEnd = false;
+  static const showPlayButtonAtEnd = true; // SDM (0005)
 
   BoxDecoration? getShadow(BuildContext context) => BoxDecoration(
     borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -238,8 +240,9 @@ class NowPlayingBar extends ConsumerWidget {
                   elevation: 8.0,
                   // If we have a media item and the player hasn't finished, show
                   // the now playing bar.
-                  child: //TODO move into separate component and share with queue list
-                  Container(
+                  child: SdmMiniProgressOverlay(
+                  currentTrack: currentTrack,
+                  child: Container(
                     width: MediaQuery.widthOf(context),
                     height: albumImageSize,
                     padding: EdgeInsets.zero,
@@ -256,7 +259,7 @@ class NowPlayingBar extends ConsumerWidget {
                         Stack(
                           alignment: Alignment.center,
                           children: [
-                            if (ref.watch(finampSettingsProvider.showProgressOnNowPlayingBar))
+                            if (sdmMiniProgressFill && ref.watch(finampSettingsProvider.showProgressOnNowPlayingBar))
                               Positioned.fill(child: ColoredBox(color: remainingPartBackgroundColor)),
                             AlbumImage(
                               placeholderBuilder: (_) => const SizedBox.shrink(),
@@ -291,7 +294,7 @@ class NowPlayingBar extends ConsumerWidget {
                         Expanded(
                           child: Stack(
                             children: [
-                              if (ref.watch(finampSettingsProvider.showProgressOnNowPlayingBar))
+                              if (sdmMiniProgressFill && ref.watch(finampSettingsProvider.showProgressOnNowPlayingBar))
                                 Positioned.fill(
                                   child: StreamBuilder<Duration>(
                                     stream: AudioService.position,
@@ -457,11 +460,10 @@ class NowPlayingBar extends ConsumerWidget {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        AddToPlaylistButton(
+                                        FavoriteButton(
                                           item: currentTrackBaseItem,
-                                          queueItem: currentTrack,
                                           color: primaryTextColor,
-                                          size: 28,
+                                          size: 26,
                                           visualDensity: const VisualDensity(horizontal: -4),
                                         ),
 
@@ -502,6 +504,7 @@ class NowPlayingBar extends ConsumerWidget {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ),
               ),
