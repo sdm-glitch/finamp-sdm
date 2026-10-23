@@ -136,3 +136,117 @@ app.*.map.json
 
 # Integration testing artifacts
 integration_test/testing
+
+# ==== SDM build: strict ignore list (appended to upstream's .gitignore) ====================
+# Nothing secret, local or generated may ever be committed to this public repo.
+
+# ---- secrets, credentials, tokens ----
+.env
+.env.*
+*.env
+!*.env.example
+**/secrets*
+**/*secret*.json
+**/*secret*.yaml
+**/*secret*.yml
+**/credentials*
+**/*credential*
+**/*token*.txt
+**/*token*.json
+**/auth.json
+**/*.htpasswd
+**/.netrc
+**/.pgpass
+**/*.kdbx
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase*.json
+
+# ---- keys, certificates, signing ----
+*.pem
+*.key
+*.crt
+*.cer
+*.csr
+*.der
+*.p8
+*.p12
+*.pfx
+*.jks
+*.keystore
+**/key.properties
+**/keystore.properties
+**/signing.properties
+**/signing/
+**/id_rsa*
+**/id_ed25519*
+**/id_ecdsa*
+**/*deploy_key*
+*.gpg
+*.asc
+*.mobileprovision
+
+# ---- local machine config ----
+**/local.properties
+**/gradle-local.properties
+**/.flutter-plugins-local
+
+# ---- VPN / tunnels / remote access ----
+**/wg*.conf
+*.ovpn
+**/*tunnel*.json
+**/*tunnel*.yml
+**/*vpn*.conf
+**/*vpn*.json
+
+# ---- data, databases, dumps ----
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.dump
+*.sql
+*.bak
+*.bak.*
+*.orig
+*.rej
+*.old
+*.swp
+*~
+
+# ---- build outputs, packages, binaries ----
+**/build/
+**/out/
+**/dist/
+*.apk
+*.aab
+*.ipa
+*.exe
+*.msi
+*.msix
+*.dmg
+*.app.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# ---- logs, caches, tooling, IDE ----
+*.log
+**/logs/
+**/.dart_tool/
+**/.gradle/
+**/.cxx/
+**/.idea/
+**/.vscode/
+**/__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- AI assistant / agent local state ----
+.claude/
+**/settings.local.json
+**/.aider*
