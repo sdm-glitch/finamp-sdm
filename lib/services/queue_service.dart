@@ -12,6 +12,7 @@ import 'package:finamp/gen/assets.gen.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/models/jellyfin_models.dart' as jellyfin_models;
+import 'package:finamp/sdm/sdm_prefs.dart';
 import 'package:finamp/services/album_image_provider.dart';
 import 'package:finamp/services/current_album_image_provider.dart';
 import 'package:finamp/services/downloads_service.dart';
@@ -743,6 +744,11 @@ class QueueService {
       if (itemList.isEmpty) {
         _queueServiceLogger.warning("Cannot start playback of empty queue! Source: $source");
         return;
+      }
+
+      // SDM (0006): remember when each playlist was played, to order playlists by it
+      if (beginPlaying && !isRestoredQueue && source.type == QueueItemSourceType.playlist) {
+        unawaited(SdmPrefs.instance.markPlaylistPlayed(source.id));
       }
 
       if (!skipRadioCacheInvalidation) {

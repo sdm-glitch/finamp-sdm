@@ -21,7 +21,7 @@ class EditItemMenuEntry extends ConsumerWidget implements HideableMenuEntry {
     return Visibility(
       visible: itemIsEditable && !ref.watch(finampSettingsProvider.isOffline),
       child: MenuEntry(
-        enabled: ref.watch(canDeleteFromServerProvider(baseItem)),
+        enabled: itemIsEditable && ref.watch(canEditPlaylistProvider(baseItem)),
         icon: TablerIcons.edit,
         title: AppLocalizations.of(context)!.editItemTitle(BaseItemDtoType.fromItem(baseItem).name),
         onTap: () {

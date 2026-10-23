@@ -1,5 +1,7 @@
 // SDM build: personal settings that are not part of Finamp's Hive settings model
 // (patch 0002-flipcard-lyrics). Stored with shared_preferences, loaded once at first use.
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +17,7 @@ class SdmPrefs {
 
   static const _kFlipCardEnabled = "sdm.flipCardEnabled";
   static const _kCardLyricsFontSize = "sdm.cardLyricsFontSize";
+  static const _kPlaylistPlayedAt = "sdm.playlistPlayedAt";
 
   /// Tapping the cover on the player screen turns it over to show the lyrics.
   final ValueNotifier<bool> flipCardEnabled = ValueNotifier(defaultFlipCardEnabled);
@@ -25,6 +28,10 @@ class SdmPrefs {
   /// Whether the player card currently shows its lyrics side (kept across tracks and screens).
   final ValueNotifier<bool> cardFlipped = ValueNotifier(false);
 
+  /// Playlist id -> when it was last played (ms since epoch), for ordering playlists (patch 0006).
+  /// Kept on this device, so it also works offline.
+  final ValueNotifier<Map<String, int>> playlistPlayedAt = ValueNotifier(const {});
+
   Future<void>? _loading;
 
   Future<void> ensureLoaded() => _loading ??= _load();
@@ -34,6 +41,7 @@ class SdmPrefs {
       final prefs = await SharedPreferences.getInstance();
       flipCardEnabled.value = prefs.getBool(_kFlipCardEnabled) ?? defaultFlipCardEnabled;
       cardLyricsFontSize.value = _clampFontSize(prefs.getDouble(_kCardLyricsFontSize) ?? defaultCardLyricsFontSize);
+      playlistPlayedAt.value = decodePlayedAt(prefs.getString(_kPlaylistPlayedAt));
     } catch (_) {
       // keep the defaults
     }
@@ -52,6 +60,28 @@ class SdmPrefs {
     cardLyricsFontSize.value = _clampFontSize(value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_kCardLyricsFontSize, cardLyricsFontSize.value);
+  }
+
+  /// Remembers that [playlistId] was played now.
+  Future<void> markPlaylistPlayed(String playlistId, {DateTime? now}) async {
+    await ensureLoaded();
+    playlistPlayedAt.value = {...playlistPlayedAt.value, playlistId: (now ?? DateTime.now()).millisecondsSinceEpoch};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kPlaylistPlayedAt, jsonEncode(playlistPlayedAt.value));
+    } catch (_) {
+      // still ordered correctly until the app is closed
+    }
+  }
+
+  /// Reads the stored JSON map; anything unreadable counts as "nothing played yet".
+  static Map<String, int> decodePlayedAt(String? json) {
+    if (json == null) return const {};
+    try {
+      return {for (final entry in (jsonDecode(json) as Map<String, dynamic>).entries) entry.key: entry.value as int};
+    } catch (_) {
+      return const {};
+    }
   }
 
   void toggleCard() {

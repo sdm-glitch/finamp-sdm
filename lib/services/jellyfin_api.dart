@@ -79,10 +79,6 @@ abstract class JellyfinApi extends ChopperService {
   Future<dynamic> getViews(@Path() String id);
 
   @FactoryConverter(request: JsonConverter.requestFactory, response: JsonConverter.responseFactory)
-  @Delete(path: "/Items/{id}")
-  Future<dynamic> deleteItem(@Path() BaseItemId id);
-
-  @FactoryConverter(request: JsonConverter.requestFactory, response: JsonConverter.responseFactory)
   @Get(path: "/Users/{userId}/Items")
   Future<dynamic> getItems({
     /// The user id supplied as query parameter.
