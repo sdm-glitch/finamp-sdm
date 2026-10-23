@@ -1,12 +1,9 @@
 // SDM build (patch 0004-playlist-page): Spotify-style playlist page - big cover, title, songs + total
-// duration, download/share on the left, shuffle toggle + big Play on the right, Add/Edit chips, a menu
-// (edit, change cover, more), a "Find in playlist" field that sits above the top until pulled down, and
-// the track rows.
-import 'dart:async';
-import 'dart:io';
+// duration, download/share on the left, shuffle toggle + big Play on the right, Add/Edit chips, the
+// playlist menu behind the three dots (patch 0006), a "Find in playlist" field that sits above the top
+// until pulled down, and the track rows.
 import 'dart:math';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:finamp/components/AlbumScreen/download_button.dart';
 import 'package:finamp/components/AlbumScreen/track_list_tile.dart';
 import 'package:finamp/components/MusicScreen/item_wrapper.dart';
@@ -86,66 +83,7 @@ class _SdmPlaylistPageState extends ConsumerState<SdmPlaylistPage> {
     );
   }
 
-  void _snack(String text) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
-
-  Future<void> _changeCover() async {
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    final path = result?.files.single.path;
-    if (path == null) return;
-    try {
-      await GetIt.instance<JellyfinApiHelper>().setItemPrimaryImage(itemId: playlist.id, imageFile: File(path));
-      ref.invalidate(sdmPlaylistsProvider);
-      _snack("Cover updated - it shows after the next refresh");
-    } catch (e) {
-      _snack("Could not change the cover: $e");
-    }
-  }
-
   void _openEdit() => Navigator.pushNamed(context, PlaylistEditScreen.routeName, arguments: playlist);
-
-  Future<void> _showMenu(bool canEdit) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheet) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (canEdit)
-              ListTile(
-                leading: const Icon(TablerIcons.edit),
-                title: const Text("Edit playlist"),
-                onTap: () {
-                  Navigator.pop(sheet);
-                  _openEdit();
-                },
-              ),
-            if (canEdit)
-              ListTile(
-                leading: const Icon(TablerIcons.photo),
-                title: const Text("Change cover"),
-                subtitle: const Text("Pick an image on this device"),
-                onTap: () {
-                  Navigator.pop(sheet);
-                  unawaited(_changeCover());
-                },
-              ),
-            ListTile(
-              leading: const Icon(TablerIcons.dots),
-              title: const Text("More actions"),
-              onTap: () {
-                Navigator.pop(sheet);
-                openItemMenu(context: context, item: playlist);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Future<void> _showAdd() async {
     await showModalBottomSheet<void>(
@@ -178,7 +116,7 @@ class _SdmPlaylistPageState extends ConsumerState<SdmPlaylistPage> {
             IconButton(
               tooltip: "More",
               icon: const Icon(TablerIcons.dots_vertical),
-              onPressed: () => _showMenu(canEdit),
+              onPressed: () => openItemMenu(context: context, item: playlist),
             ),
           ],
         ),
@@ -324,7 +262,6 @@ class _SdmPlaylistPageState extends ConsumerState<SdmPlaylistPage> {
                 showIndex: false,
                 showCover: true,
                 parentItem: playlist,
-                allowDismiss: false,
                 parentPlayable: PrecalculatedPlayable(source: QueueItemSource.fromBaseItem(playlist), tracks: playable),
               );
             }, childCount: shown.length),

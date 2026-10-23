@@ -517,11 +517,6 @@ class JellyfinApiHelper {
     });
   }
 
-  Future<dynamic> deleteItem(BaseItemId itemId) async {
-    assert(_verifyCallable());
-    return await jellyfinApi.deleteItem(itemId);
-  }
-
   Future<List<BaseItemDto>?> getLatestItems({
     BaseItemDto? parentItem,
     String? includeItemTypes,
