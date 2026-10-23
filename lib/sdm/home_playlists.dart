@@ -1,11 +1,12 @@
 // SDM build (patch 0003-home-playlists): the home tab shows only the user's playlists, as a grid of
-// Spotify-style cards (cover, name, download state + "Playlist"). Albums, artists, genres etc. stay on
-// their own tabs.
+// Spotify-style cards (cover, name, download state + "Playlist"), the most recently played first (patch
+// 0006). Albums, artists, genres etc. stay on their own tabs.
 import 'package:finamp/components/MusicScreen/item_wrapper.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/models/jellyfin_models.dart';
 import 'package:finamp/screens/album_screen.dart';
 import 'package:finamp/sdm/playlist_cover.dart';
+import 'package:finamp/sdm/playlist_recent.dart';
 import 'package:finamp/services/downloads_service.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/jellyfin_api_helper.dart';
@@ -22,7 +23,8 @@ const sdmGreen = Color(0xFF1ED760);
 /// Columns of the playlist grid: 2 on phones, more on wide screens.
 int sdmGridColumns(double width) => width >= 900 ? 4 : (width >= 600 ? 3 : 2);
 
-/// All playlists of the user (online), or the downloaded ones (offline), by name.
+/// All playlists of the user (online), or the downloaded ones (offline), by name (the grid then puts the
+/// recently played ones first).
 final sdmPlaylistsProvider = FutureProvider.autoDispose<List<BaseItemDto>>((ref) async {
   final offline = ref.watch(finampSettingsProvider.isOffline);
   List<BaseItemDto> items;
@@ -53,7 +55,10 @@ class SdmHomeContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playlists = ref.watch(sdmPlaylistsProvider);
+    final playedAt = ref.watch(sdmPlaylistPlayedProvider);
+    final playlists = ref
+        .watch(sdmPlaylistsProvider)
+        .whenData((items) => sdmSortByLastPlayed(items, (playlist) => playlist.id.raw, playedAt));
     final offline = ref.watch(finampSettingsProvider.isOffline);
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(sdmPlaylistsProvider),

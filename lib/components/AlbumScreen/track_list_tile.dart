@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:finamp/components/AddToPlaylistScreen/add_to_playlist_button.dart';
 import 'package:finamp/components/global_snackbar.dart';
 import 'package:finamp/extensions/string.dart';
 import 'package:finamp/l10n/app_localizations.dart';
@@ -53,6 +52,9 @@ enum TrackListTileMenuItems {
   download,
   delete,
 }
+
+/// SDM build (0006): swiping a track row to the right always appends it to the queue.
+const sdmSwipeRightAction = ItemSwipeActions.addToQueue;
 
 class TrackListTile extends ConsumerWidget {
   const TrackListTile({
@@ -265,7 +267,7 @@ class TrackListTile extends ConsumerWidget {
       onTap: trackListTileOnTap,
       confirmDismiss: (direction) async {
         var followUpAction = (direction == DismissDirection.startToEnd)
-            ? FinampSettingsHelper.finampSettings.itemSwipeActionLeftToRight
+            ? sdmSwipeRightAction
             : FinampSettingsHelper.finampSettings.itemSwipeActionRightToLeft;
         return await onConfirmPlayableDismiss(
           followUpAction: followUpAction,
@@ -275,7 +277,7 @@ class TrackListTile extends ConsumerWidget {
       leftSwipeBackground: buildSwipeActionBackground(
         context: context,
         direction: DismissDirection.startToEnd,
-        action: ref.watch(finampSettingsProvider.itemSwipeActionLeftToRight),
+        action: sdmSwipeRightAction,
         iconSize: 40.0,
       ),
       rightSwipeBackground: buildSwipeActionBackground(
@@ -289,8 +291,8 @@ class TrackListTile extends ConsumerWidget {
         showIndex ? TrackListItemFeatures.parentIndex : null,
         showCover ? TrackListItemFeatures.cover : null,
         TrackListItemFeatures.duration,
-        TrackListItemFeatures.addToPlaylistOrFavorite,
         playable && allowDismiss ? TrackListItemFeatures.swipeableInTrackList : null,
+        playable && allowDismiss ? TrackListItemFeatures.swipeRightAddsToQueue : null,
       ].nonNulls.toList(),
     );
   }
@@ -430,7 +432,6 @@ class QueueListTile extends StatelessWidget {
       features: [
         TrackListItemFeatures.cover,
         TrackListItemFeatures.duration,
-        TrackListItemFeatures.addToPlaylistOrFavorite,
         TrackListItemFeatures.swipeableInTrackList,
         TrackListItemFeatures.swipeableInQueue,
         allowReorder ? TrackListItemFeatures.dragHandle : null,
@@ -604,6 +605,7 @@ class TrackListItem extends ConsumerWidget {
                       ? DismissDirection.endToStart
                       : getAllowedDismissDirection(
                           swipeLeftEnabled:
+                              features.contains(TrackListItemFeatures.swipeRightAddsToQueue) ||
                               ref.watch(finampSettingsProvider.itemSwipeActionLeftToRight) != ItemSwipeActions.nothing,
                           swipeRightEnabled:
                               ref.watch(finampSettingsProvider.itemSwipeActionRightToLeft) != ItemSwipeActions.nothing,
@@ -659,13 +661,13 @@ enum TrackListItemFeatures {
   parentIndex,
   cover,
   duration,
-  addToPlaylistOrFavorite,
   dragHandle,
   fullyDraggable,
   swipeableInTrackList,
   removeFromListButton,
   restoreButton,
   swipeableInQueue,
+  swipeRightAddsToQueue,
 }
 
 class TrackListItemTile extends ConsumerWidget {
@@ -1059,15 +1061,6 @@ class TrackListItemTile extends ConsumerWidget {
                     semanticsLabel: durationLabelString,
                     textAlign: TextAlign.end,
                     style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6)),
-                  ),
-                if (features.contains(TrackListItemFeatures.addToPlaylistOrFavorite))
-                  Semantics(
-                    excludeSemantics: true,
-                    child: AddToPlaylistButton(
-                      item: baseItem,
-                      size: 24,
-                      visualDensity: const VisualDensity(horizontal: -4),
-                    ),
                   ),
                 if (features.contains(TrackListItemFeatures.removeFromListButton))
                   IconButton(

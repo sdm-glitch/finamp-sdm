@@ -251,7 +251,6 @@ class HomeScreenSection extends ConsumerWidget {
           if (getHomeDownloadInfo(ref, context.l10n, sectionInfo, sectionDisplayable?.maybeItem) case var downloadInfo?)
             DownloadButton(
               item: downloadInfo.stub,
-              allowServerDelete: false,
               warningMessage: downloadInfo.warning,
               downloadOnly: true,
             ),

@@ -5,50 +5,6 @@ import 'package:finamp/services/jellyfin_api_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 
-final AutoDisposeProviderFamily<bool, BaseItemDto> canDeleteFromServerProvider = AutoDisposeProviderFamily((
-  ref,
-  BaseItemDto item,
-) {
-  // we can't delete from server when offline
-  bool offline = ref.watch(finampSettingsProvider.isOffline);
-  if (offline) {
-    return false;
-  }
-  var itemType = BaseItemDtoType.fromItem(item);
-  var isPlaylist = itemType == BaseItemDtoType.playlist;
-  bool deleteEnabled = ref.watch(finampSettingsProvider.allowDeleteFromServer);
-
-  // always check if a playlist is deletable
-  if (!deleteEnabled && !isPlaylist) {
-    return false;
-  }
-
-  // do not bother checking server for item types known to not be deletable
-  if (![BaseItemDtoType.album, BaseItemDtoType.playlist, BaseItemDtoType.track].contains(itemType)) {
-    return false;
-  }
-  bool? serverReturn = ref.watch(_canDeleteFromServerAsyncProvider(item.id)).value;
-  if (serverReturn == null) {
-    // fallback to allowing deletion even if the response is invalid, since the user might still be able to delete
-    // worst case would be getting an error message when trying to delete
-    return item.canDelete ?? true;
-  } else {
-    return serverReturn;
-  }
-});
-
-final AutoDisposeFutureProviderFamily<bool?, BaseItemId> _canDeleteFromServerAsyncProvider =
-    AutoDisposeFutureProviderFamily((ref, BaseItemId id) {
-      return GetIt.instance<JellyfinApiHelper>()
-          .getItemById(id)
-          .then((response) {
-            return response.canDelete;
-          })
-          .catchError((_) {
-            return false;
-          });
-    });
-
 final AutoDisposeProviderFamily<bool, BaseItemDto> canEditPlaylistProvider = AutoDisposeProviderFamily((
   ref,
   BaseItemDto item,

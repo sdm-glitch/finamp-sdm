@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:finamp/extensions/list.dart';
 import 'package:finamp/models/music_models.dart';
+import 'package:finamp/sdm/playlist_recent.dart';
 import 'package:finamp/services/artist_content_provider.dart';
 import 'package:finamp/services/finamp_user_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -128,6 +129,21 @@ class PagedContent extends _$PagedContent {
     }
 
     _dependencies = providers;
+
+    // SDM (0006): with the default order, the Playlists tab shows the most recently played playlists first
+    if (musicRequest.tab == ContentType.playlists &&
+        musicRequest.sortConfig.sortBy == SortBy.sortName &&
+        musicRequest.sortConfig.sortOrder == SortOrder.ascending) {
+      pages.replaceRange(
+        0,
+        pages.length,
+        sdmSortPagesByLastPlayed(
+          pages,
+          (item) => item.id,
+          ref.watch(sdmPlaylistPlayedProvider),
+        ),
+      );
+    }
 
     return PagingState<int, FinampDisplayableOrPlayable>(
       pages: pages.isEmpty ? null : pages,

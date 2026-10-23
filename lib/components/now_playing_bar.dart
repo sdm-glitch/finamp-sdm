@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:finamp/color_schemes.g.dart';
-import 'package:finamp/components/AddToPlaylistScreen/add_to_playlist_button.dart';
 import 'package:finamp/components/audio_fade_progress_visualizer_container.dart';
 import 'package:finamp/components/global_snackbar.dart';
 import 'package:finamp/components/one_line_marquee_helper.dart';
@@ -24,14 +23,12 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:get_it/get_it.dart';
 import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 
-import '../models/jellyfin_models.dart' as jellyfin_models;
 import '../screens/player_screen.dart';
 import '../services/current_album_image_provider.dart';
 import '../services/finamp_settings_helper.dart';
 import '../services/media_state_stream.dart';
 import '../services/music_player_background_task.dart';
 import '../services/process_artist.dart';
-import 'package:finamp/components/favorite_button.dart';
 import 'package:finamp/sdm/player_ui.dart';
 import 'PlayerScreen/player_split_screen_scaffold.dart';
 import 'album_image.dart';
@@ -171,9 +168,6 @@ class NowPlayingBar extends ConsumerWidget {
 
     Duration? playbackPosition;
 
-    final currentTrackBaseItem = currentTrack.item.extras?["itemJson"] != null
-        ? jellyfin_models.BaseItemDto.fromJson(currentTrack.item.extras!["itemJson"] as Map<String, dynamic>)
-        : null;
     var context = ref.context;
 
     final elapsedPartBackgroundColor = getProgressForegroundColor(ref);
@@ -460,13 +454,6 @@ class NowPlayingBar extends ConsumerWidget {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        FavoriteButton(
-                                          item: currentTrackBaseItem,
-                                          color: primaryTextColor,
-                                          size: 26,
-                                          visualDensity: const VisualDensity(horizontal: -4),
-                                        ),
-
                                         if (showPlayButtonAtEnd)
                                           Stack(
                                             alignment: Alignment.center,
